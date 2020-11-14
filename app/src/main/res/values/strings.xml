@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">Text Recognizer</string>
+    <string name="slogan">Made to make Image recognition and your life easier.</string>
+    <string name="recognizedText">Recognized Text</string>
+    <string name="copy">Copy</string>
+    <string name="selectFromStorage">Select From Storage</string>
+    <string name="capturePicture">Capture A Picture</string>
+    <string name="clear">Clear All</string>
+    <string name="userSelected">User Selected Image</string>
+    <string name="processImage">Detect Text</string>
+    <string name="noText">No Text Selected!</string>
+    <string name="selectImageText">Please select a beautiful image…</string>
+    <string name="aboutText">About</string>
+    <string name="cropImage">Crop Image</string>
+    <string name="about">This app has been made by Gourav to help people copy texts from images
+    and posters easily. This app is provided free of cost and is intended to ue as is.
+    \n\nBe sure that, no data that you provide to this app, is ever stored anywhere. This app
+    uses Google\'s ML kit to recognise texts, which runs locally, without internet.
+    \n\nI hope this app will be beneficial to you :)</string>
+</resources>
