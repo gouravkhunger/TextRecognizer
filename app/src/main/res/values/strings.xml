@@ -12,8 +12,9 @@
     <string name="selectImageText">Please select a beautiful image…</string>
     <string name="aboutText">About</string>
     <string name="cropImage">Crop Image</string>
+    <string name="update">Check for Updates</string>
     <string name="about">This app has been made by Gourav to help people copy texts from images
-    and posters easily. This app is provided free of cost and is intended to ue as is.
+    and posters easily. This app is provided free of cost and is intended to use as is.
     \n\nBe sure that, no data that you provide to this app, is ever stored anywhere. This app
     uses Google\'s ML kit to recognise texts, which runs locally, without internet.
     \n\nI hope this app will be beneficial to you :)</string>

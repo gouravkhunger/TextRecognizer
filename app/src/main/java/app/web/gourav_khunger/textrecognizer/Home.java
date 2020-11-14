@@ -32,6 +32,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.github.javiersantos.appupdater.AppUpdater;
+import com.github.javiersantos.appupdater.AppUpdaterUtils;
+import com.github.javiersantos.appupdater.enums.AppUpdaterError;
+import com.github.javiersantos.appupdater.enums.UpdateFrom;
+import com.github.javiersantos.appupdater.objects.Update;
 import com.google.mlkit.vision.common.InputImage;
 import com.google.mlkit.vision.text.TextRecognition;
 import com.google.mlkit.vision.text.TextRecognizer;
@@ -68,6 +73,44 @@ public class Home extends AppCompatActivity {
     }
 
     private void init() {
+        AppUpdaterUtils appUpdaterUtils = new AppUpdaterUtils(this)
+                .setUpdateFrom(UpdateFrom.GITHUB)
+                .setGitHubUserAndRepo("GouravKhunger", "TextRecognizer")
+                .withListener(new AppUpdaterUtils.UpdateListener() {
+                    @Override
+                    public void onSuccess(Update update, Boolean isUpdateAvailable) {
+                        if(isUpdateAvailable){
+                            AlertDialog.Builder builder = new AlertDialog.Builder(Home.this);
+                            builder.setTitle("Wohhhooo!!!")
+                                    .setMessage("A new update of the app is available!!\n\nPlease Open the link and install latest APK")
+                                    .setCancelable(false)
+                                    .setPositiveButton("Open link", (dialog1, id) -> {
+                                        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/GouravKhunger/TextRecognizer/releases"));
+                                        startActivity(browserIntent);
+                                        dialog1.dismiss();
+                                    });
+                            AlertDialog alert = builder.create();
+                            alert.getWindow().setBackgroundDrawableResource(R.drawable.round_dialog);
+                            alert.setOnShowListener(arg0 -> {
+                                alert.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(ContextCompat.getColor(Home.this, R.color.blue));
+                                alert.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(ContextCompat.getColor(Home.this, R.color.blue));
+                            });
+                            alert.show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailed(AppUpdaterError error) {
+                        new StyleableToast
+                                .Builder(Home.this)
+                                .text("Error checking update!")
+                                .textColor(Color.RED)
+                                .backgroundColor(ContextCompat.getColor(Home.this, R.color.green))
+                                .font(R.font.google)
+                                .show();
+                    }
+                });
+        appUpdaterUtils.start();
         toolbar = findViewById(R.id.toolbar_home);
         toolbar.setTitle("");
         setSupportActionBar(toolbar);
@@ -211,9 +254,9 @@ public class Home extends AppCompatActivity {
                         } else {
                             AlertDialog.Builder builder = new AlertDialog.Builder(Home.this);
                             builder.setTitle("Ooof")
-                                    .setMessage("No Text Detected! ")
+                                    .setMessage("No Text Detected!")
                                     .setCancelable(false)
-                                    .setPositiveButton("Copy", (dialog1, id) -> dialog1.dismiss());
+                                    .setPositiveButton("Ok", (dialog1, id) -> dialog1.dismiss());
                             AlertDialog alert = builder.create();
                             alert.getWindow().setBackgroundDrawableResource(R.drawable.round_dialog);
                             alert.setOnShowListener(arg0 -> {
@@ -343,7 +386,6 @@ public class Home extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle item selection
         if (item.getItemId() == R.id.about) {
             AlertDialog.Builder builder = new AlertDialog.Builder(Home.this);
             builder.setTitle("About")
