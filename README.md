@@ -3,7 +3,7 @@
 
 This app allows you to capture an image from your device's camera or select an image from you device and process it to return the texts the are in the image.
 
-[Download  the latest version now](https://github.com/GouravKhunger/TextRecognizer/releases/tag/1.0)
+[Download  the latest version now](https://github.com/GouravKhunger/TextRecognizer/releases)
 
 This app uses Google's Text Recognition ML Kit which has trained models to recognize texts efficiently.
 
