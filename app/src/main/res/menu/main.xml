@@ -6,4 +6,9 @@
         android:icon="@drawable/info"
         app:showAsAction="always"
         android:title="@string/aboutText" />
+    <item
+        android:id="@+id/themeSwitcher"
+        android:icon="@drawable/night"
+        app:showAsAction="always"
+        android:title="@string/switchTheme" />
 </menu>

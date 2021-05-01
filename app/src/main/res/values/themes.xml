@@ -13,6 +13,13 @@
         <item name="android:statusBarColor" tools:targetApi="l">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
 
-        <item name="android:fontFamily">@font/google</item>
+        <item name="android:fontFamily">@font/font</item>
+    </style>
+
+    <style name="textViewStyle" parent="Theme.MaterialComponents.DayNight">
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="AlertDialogTheme" parent="Theme.AppCompat.Light.Dialog.Alert">
     </style>
 </resources>

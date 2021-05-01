@@ -18,4 +18,5 @@
     \n\nBe sure that, no data that you provide to this app, is ever stored anywhere. This app
     uses Google\'s ML kit to recognise texts, which runs locally, without internet.
     \n\nI hope this app will be beneficial to you :)</string>
+    <string name="switchTheme">Switch Theme</string>
 </resources>

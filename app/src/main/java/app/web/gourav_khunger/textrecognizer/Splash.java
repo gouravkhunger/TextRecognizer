@@ -1,9 +1,12 @@
 package app.web.gourav_khunger.textrecognizer;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
@@ -14,11 +17,24 @@ public class Splash extends AppCompatActivity {
     ImageView image;
     TextView title, slogan;
     Animation fade, zoom;
+    SharedPreferences preferences;
+    SharedPreferences.Editor editor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+
+        preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean isDark = preferences.getBoolean("theme", false);
+        if(isDark){
+            AppCompatDelegate.setDefaultNightMode
+                    (AppCompatDelegate.MODE_NIGHT_YES);
+        } else {
+            AppCompatDelegate.setDefaultNightMode
+                    (AppCompatDelegate.MODE_NIGHT_NO);
+        }
+
         setContentView(R.layout.activity_splash);
 
         image = findViewById(R.id.image_splash);
@@ -56,4 +72,9 @@ public class Splash extends AppCompatActivity {
         title.startAnimation(zoom);
         slogan.startAnimation(zoom);
     }
+
+    public boolean isDarkTheme() {
+        return AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES;
+    }
+
 }

@@ -2,6 +2,7 @@ package app.web.gourav_khunger.textrecognizer;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
 import androidx.core.content.ContextCompat;
@@ -9,16 +10,17 @@ import androidx.core.content.ContextCompat;
 import android.Manifest;
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.view.Menu;
@@ -32,7 +34,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.github.javiersantos.appupdater.AppUpdater;
 import com.github.javiersantos.appupdater.AppUpdaterUtils;
 import com.github.javiersantos.appupdater.enums.AppUpdaterError;
 import com.github.javiersantos.appupdater.enums.UpdateFrom;
@@ -56,6 +57,8 @@ public class Home extends AppCompatActivity {
     Button captureImage, selectFromStorage, clearAll, processImage, crop;
     TextView selectImageText;
     Bitmap bitmap = null;
+    SharedPreferences preferences;
+    SharedPreferences.Editor editor;
 
     private static final int PICK_IMAGE_CODE = 0;
     private static final int CAPTURE_IMAGE_CODE = 1;
@@ -68,8 +71,23 @@ public class Home extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
+        preferences = PreferenceManager.getDefaultSharedPreferences(this);
+
         init();
 
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        boolean isDark = preferences.getBoolean("theme", false);
+        if(isDark){
+            AppCompatDelegate.setDefaultNightMode
+                    (AppCompatDelegate.MODE_NIGHT_YES);
+        } else {
+            AppCompatDelegate.setDefaultNightMode
+                    (AppCompatDelegate.MODE_NIGHT_NO);
+        }
     }
 
     private void init() {
@@ -80,7 +98,7 @@ public class Home extends AppCompatActivity {
                     @Override
                     public void onSuccess(Update update, Boolean isUpdateAvailable) {
                         if(isUpdateAvailable){
-                            AlertDialog.Builder builder = new AlertDialog.Builder(Home.this);
+                            AlertDialog.Builder builder = new AlertDialog.Builder(Home.this, R.style.AlertDialogTheme);
                             builder.setTitle("Wohhhooo!!!")
                                     .setMessage("A new update of the app is available!!\n\nPlease Open the link and install latest APK")
                                     .setCancelable(false)
@@ -106,7 +124,7 @@ public class Home extends AppCompatActivity {
                                 .text("Error checking update!")
                                 .textColor(Color.RED)
                                 .backgroundColor(ContextCompat.getColor(Home.this, R.color.green))
-                                .font(R.font.google)
+                                .font(R.font.font)
                                 .show();
                     }
                 });
@@ -131,7 +149,7 @@ public class Home extends AppCompatActivity {
                             .text("I'm confused :(")
                             .textColor(Color.WHITE)
                             .backgroundColor(Color.RED)
-                            .font(R.font.google)
+                            .font(R.font.font)
                             .show();
                 }
 
@@ -172,7 +190,7 @@ public class Home extends AppCompatActivity {
                     .text("Text Copied!")
                     .textColor(Color.WHITE)
                     .backgroundColor(ContextCompat.getColor(this, R.color.green))
-                    .font(R.font.google)
+                    .font(R.font.font)
                     .show();
         }
     }
@@ -201,7 +219,7 @@ public class Home extends AppCompatActivity {
                         .text("Error: ")
                         .textColor(Color.WHITE)
                         .backgroundColor(Color.RED)
-                        .font(R.font.google)
+                        .font(R.font.font)
                         .show();
             }
         }
@@ -237,7 +255,7 @@ public class Home extends AppCompatActivity {
                         String text = result.getText();
                         dialog.dismiss();
                         if (!TextUtils.isEmpty(text) && text != null) {
-                            AlertDialog.Builder builder = new AlertDialog.Builder(Home.this);
+                            AlertDialog.Builder builder = new AlertDialog.Builder(Home.this, R.style.AlertDialogTheme);
                             builder.setTitle("Text Recognized")
                                     .setMessage(text)
                                     .setCancelable(false)
@@ -252,7 +270,7 @@ public class Home extends AppCompatActivity {
                             });
                             alert.show();
                         } else {
-                            AlertDialog.Builder builder = new AlertDialog.Builder(Home.this);
+                            AlertDialog.Builder builder = new AlertDialog.Builder(Home.this, R.style.AlertDialogTheme);
                             builder.setTitle("Ooof")
                                     .setMessage("No Text Detected!")
                                     .setCancelable(false)
@@ -273,7 +291,7 @@ public class Home extends AppCompatActivity {
                                 .text("Error: " + e.getMessage())
                                 .textColor(Color.WHITE)
                                 .backgroundColor(Color.RED)
-                                .font(R.font.google)
+                                .font(R.font.font)
                                 .show();
                     });
         }
@@ -326,8 +344,6 @@ public class Home extends AppCompatActivity {
             } else {
                 hideAll();
             }
-
-
         }
 
         if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
@@ -351,7 +367,7 @@ public class Home extends AppCompatActivity {
                                     .text("Saved storage by deleting unwanted image crop data :)")
                                     .textColor(Color.WHITE)
                                     .backgroundColor(ContextCompat.getColor(this, R.color.blue))
-                                    .font(R.font.google)
+                                    .font(R.font.font)
                                     .length(Toast.LENGTH_LONG)
                                     .show();
                         } else {
@@ -360,7 +376,7 @@ public class Home extends AppCompatActivity {
                                     .text("Could not delete unwanted cropped image data :(")
                                     .textColor(Color.WHITE)
                                     .backgroundColor(Color.RED)
-                                    .font(R.font.google)
+                                    .font(R.font.font)
                                     .length(Toast.LENGTH_LONG)
                                     .show();
                         }
@@ -381,13 +397,20 @@ public class Home extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.main, menu);
+
+        if(isDarkTheme()){
+            menu.findItem(R.id.themeSwitcher).setIcon(R.drawable.day);
+        } else{
+            menu.findItem(R.id.themeSwitcher).setIcon(R.drawable.night);
+        }
+
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == R.id.about) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(Home.this);
+            AlertDialog.Builder builder = new AlertDialog.Builder(Home.this, R.style.AlertDialogTheme);
             builder.setTitle("About")
                     .setMessage(getResources().getString(R.string.about))
                     .setCancelable(false)
@@ -398,7 +421,7 @@ public class Home extends AppCompatActivity {
                                 .text("Thank you :)")
                                 .textColor(Color.WHITE)
                                 .backgroundColor(ContextCompat.getColor(this, R.color.green))
-                                .font(R.font.google)
+                                .font(R.font.font)
                                 .show();
                     });
             AlertDialog alert = builder.create();
@@ -409,8 +432,29 @@ public class Home extends AppCompatActivity {
             });
             alert.show();
             return true;
+        } else if(item.getItemId() == R.id.themeSwitcher) {
+            editor = preferences.edit();
+            if (isDarkTheme()) {
+                AppCompatDelegate.setDefaultNightMode
+                        (AppCompatDelegate.MODE_NIGHT_NO);
+                item.setIcon(R.drawable.night);
+
+                editor.putBoolean("theme", false);
+                editor.apply();
+            } else {
+                AppCompatDelegate.setDefaultNightMode
+                        (AppCompatDelegate.MODE_NIGHT_YES);
+                item.setIcon(R.drawable.day);
+
+                editor.putBoolean("theme", true);
+                editor.apply();
+            }
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    public boolean isDarkTheme() {
+        return AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES;
     }
 
 }

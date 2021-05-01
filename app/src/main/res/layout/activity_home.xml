@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    tools:context=".Home">
 
     <androidx.appcompat.widget.Toolbar xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/toolbar_home"
@@ -18,7 +20,6 @@
             android:layout_height="wrap_content"
             android:textSize="22sp"
             android:text="@string/app_name"
-            android:layout_gravity="center"
             android:textColor="@android:color/white"/>
 
     </androidx.appcompat.widget.Toolbar>
@@ -38,8 +39,8 @@
             android:layout_height="wrap_content"
             android:layout_margin="30dp"
             android:text="@string/selectImageText"
-            android:textColor="#000000"
-            android:textSize="24sp" />
+            android:textSize="24sp"
+            style="@style/textViewStyle"/>
 
         <androidx.cardview.widget.CardView
             android:id="@+id/imageHolder"
