@@ -7,5 +7,9 @@ This app allows you to capture an image from your device's camera or select an i
 
 This app uses Google's Text Recognition ML Kit which has trained models to recognize texts efficiently.
 
+## :bulb: Tech Used
+
+<img src="https://marvel-b1-cdn.bc0a.com/f00000000156946/www.jrebel.com/sites/rebel/files/image/2021-01/what%20is%20kotlin%20banner%20image.png" height="70px" width="100px">
+
 You can use the app as you like, or clone the repository to add your own customizations to the app.
 If this helps you, do not forget to Star the Repository and Fork it to contribute :)
