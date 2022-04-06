@@ -5,41 +5,32 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.cardview.widget.CardView
 import android.graphics.Bitmap
 import android.os.Bundle
-import app.web.gourav_khunger.textrecognizer.R
 import android.preference.PreferenceManager
 import androidx.appcompat.app.AppCompatDelegate
 import com.github.javiersantos.appupdater.AppUpdaterUtils
 import com.github.javiersantos.appupdater.enums.UpdateFrom
 import com.github.javiersantos.appupdater.AppUpdaterUtils.UpdateListener
 import com.github.javiersantos.appupdater.objects.Update
-import android.content.DialogInterface.OnShowListener
 import androidx.core.content.ContextCompat
 import com.github.javiersantos.appupdater.enums.AppUpdaterError
-import com.muddzdev.styleabletoast.StyleableToast
 import com.theartofdev.edmodo.cropper.CropImage
 import android.content.pm.PackageManager
-import app.web.gourav_khunger.textrecognizer.Home
 import android.provider.MediaStore
 import android.text.TextUtils
 import android.app.ProgressDialog
 import com.google.mlkit.vision.common.InputImage
-import com.google.mlkit.vision.text.TextRecognizer
 import com.google.mlkit.vision.text.TextRecognition
-import com.google.android.gms.tasks.OnSuccessListener
-import com.google.android.gms.tasks.OnFailureListener
-import android.app.Activity
 import android.content.*
-import android.graphics.Color
 import android.net.Uri
 import android.view.Menu
 import com.bumptech.glide.Glide
-import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.Toolbar
 import com.google.mlkit.vision.text.Text
+import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
@@ -110,12 +101,7 @@ class Home : AppCompatActivity() {
                 }
 
                 override fun onFailed(error: AppUpdaterError) {
-                    StyleableToast.Builder(this@Home)
-                        .text("Error checking update!")
-                        .textColor(Color.RED)
-                        .backgroundColor(ContextCompat.getColor(this@Home, R.color.green))
-                        .font(R.font.font)
-                        .show()
+                    Toast.makeText(this@Home, "Error checking for update!", Toast.LENGTH_SHORT).show()
                 }
             })
         appUpdaterUtils.start()
@@ -134,12 +120,7 @@ class Home : AppCompatActivity() {
                     CropImage.activity(uri)
                         .start(this)
                 } else {
-                    StyleableToast.Builder(this)
-                        .text("I'm confused :(")
-                        .textColor(Color.WHITE)
-                        .backgroundColor(Color.RED)
-                        .font(R.font.font)
-                        .show()
+                    Toast.makeText(this, "Incorrect image path :(", Toast.LENGTH_SHORT).show()
                 }
             }
         })
@@ -180,12 +161,7 @@ class Home : AppCompatActivity() {
             val clipboard = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
             val clip = ClipData.newPlainText("Recognized Text", text)
             clipboard.setPrimaryClip(clip)
-            StyleableToast.Builder(this)
-                .text("Text Copied!")
-                .textColor(Color.WHITE)
-                .backgroundColor(ContextCompat.getColor(this, R.color.green))
-                .font(R.font.font)
-                .show()
+            Toast.makeText(this, "Copied to Clipboard!", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -210,12 +186,7 @@ class Home : AppCompatActivity() {
             if (cameraIntent.resolveActivity(packageManager) != null) {
                 startActivityForResult(cameraIntent, CAPTURE_IMAGE_CODE)
             } else {
-                StyleableToast.Builder(this)
-                    .text("Error: ")
-                    .textColor(Color.WHITE)
-                    .backgroundColor(Color.RED)
-                    .font(R.font.font)
-                    .show()
+                Toast.makeText(this, "Camera app not found!", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -243,8 +214,8 @@ class Home : AppCompatActivity() {
             dialog.setMessage("Please have patience ._.")
             dialog.setCancelable(false)
             dialog.show()
-            val inputImage = InputImage.fromBitmap(bitmap, 0)
-            val recognizer = TextRecognition.getClient()
+            val inputImage = InputImage.fromBitmap(bitmap!!, 0)
+            val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
             recognizer.process(inputImage)
                 .addOnSuccessListener { result: Text ->
                     val text = result.text
@@ -289,12 +260,7 @@ class Home : AppCompatActivity() {
                 }
                 .addOnFailureListener { e: Exception ->
                     hideAll()
-                    StyleableToast.Builder(this)
-                        .text("Error: " + e.message)
-                        .textColor(Color.WHITE)
-                        .backgroundColor(Color.RED)
-                        .font(R.font.font)
-                        .show()
+                    Toast.makeText(this, "Error occurred:\n${e.message}", Toast.LENGTH_SHORT).show()
                 }
         }
     }
@@ -349,23 +315,7 @@ class Home : AppCompatActivity() {
                         .into(image!!)
                     val fdelete = File(result.uri.path)
                     if (fdelete.exists()) {
-                        if (fdelete.delete()) {
-                            StyleableToast.Builder(this)
-                                .text("Saved storage by deleting unwanted image crop data :)")
-                                .textColor(Color.WHITE)
-                                .backgroundColor(ContextCompat.getColor(this, R.color.blue))
-                                .font(R.font.font)
-                                .length(Toast.LENGTH_LONG)
-                                .show()
-                        } else {
-                            StyleableToast.Builder(this)
-                                .text("Could not delete unwanted cropped image data :(")
-                                .textColor(Color.WHITE)
-                                .backgroundColor(Color.RED)
-                                .font(R.font.font)
-                                .length(Toast.LENGTH_LONG)
-                                .show()
-                        }
+                        fdelete.delete()
                     }
                     showAll()
                 } catch (e: IOException) {
@@ -396,12 +346,7 @@ class Home : AppCompatActivity() {
                 .setCancelable(false)
                 .setPositiveButton("Nice!") { dialog1: DialogInterface, id: Int ->
                     dialog1.dismiss()
-                    StyleableToast.Builder(this)
-                        .text("Thank you :)")
-                        .textColor(Color.WHITE)
-                        .backgroundColor(ContextCompat.getColor(this, R.color.green))
-                        .font(R.font.font)
-                        .show()
+                    Toast.makeText(this, "Thank you :)", Toast.LENGTH_SHORT).show()
                 }
             val alert = builder.create()
             alert.window!!.setBackgroundDrawableResource(R.drawable.round_dialog)
