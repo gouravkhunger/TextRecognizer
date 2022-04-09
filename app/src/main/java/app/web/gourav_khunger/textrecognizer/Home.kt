@@ -72,10 +72,6 @@ class Home : AppCompatActivity() {
         binding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        init()
-    }
-
-    private fun init() {
         isDarkTheme = this.dataStore.data
             .catch {
                 if (it is IOException) {
@@ -98,36 +94,6 @@ class Home : AppCompatActivity() {
             }
             invalidateOptionsMenu()
         }
-
-        val appUpdaterUtils = AppUpdaterUtils(this)
-            .setUpdateFrom(UpdateFrom.GITHUB)
-            .setGitHubUserAndRepo("GouravKhunger", "TextRecognizer")
-            .withListener(object : UpdateListener {
-                override fun onSuccess(update: Update, isUpdateAvailable: Boolean) {
-                    if (isUpdateAvailable) {
-                        showAlert(
-                            "Wohhhooo!!!",
-                            "A new update of the app is available!!\n\nPlease Open the link to download latest APK",
-                            false,
-                            "Open link", { dialog, _ ->
-                                val browserIntent = Intent(
-                                    Intent.ACTION_VIEW,
-                                    Uri.parse("http://textrecognizer.gouravkhunger.xyz")
-                                )
-                                startActivity(browserIntent)
-                                dialog.dismiss()
-                            }
-                        )
-                    }
-                }
-
-                override fun onFailed(error: AppUpdaterError) {
-                    Toast.makeText(this@Home, "Error checking for update!", Toast.LENGTH_SHORT)
-                        .show()
-                }
-            })
-
-        appUpdaterUtils.start()
 
         binding.apply {
             toolbarHome.title = ""
@@ -158,6 +124,11 @@ class Home : AppCompatActivity() {
         }
 
         hideAll()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        checkForUpdates()
     }
 
     fun getImageUri(inContext: Context, inImage: Bitmap): Uri? {
@@ -374,7 +345,7 @@ class Home : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
-    fun showAlert (
+    fun showAlert(
         title: String,
         message: String,
         isCancelable: Boolean,
@@ -401,5 +372,33 @@ class Home : AppCompatActivity() {
         val alert = builder.create()
         alert.window!!.setBackgroundDrawableResource(R.drawable.round_dialog)
         alert.show()
+    }
+
+    private fun checkForUpdates() {
+        val appUpdaterUtils = AppUpdaterUtils(this)
+            .setUpdateFrom(UpdateFrom.GITHUB)
+            .setGitHubUserAndRepo("GouravKhunger", "TextRecognizer")
+            .withListener(object : UpdateListener {
+                override fun onSuccess(update: Update, isUpdateAvailable: Boolean) {
+                    if (!isUpdateAvailable) return
+                    showAlert(
+                        "Wohhhooo!!!",
+                        "A new update of the app is available!!\n\nPlease Open the link to download latest APK",
+                        false,
+                        "Open link", { dialog, _ ->
+                            val browserIntent = Intent(
+                                Intent.ACTION_VIEW,
+                                Uri.parse("http://textrecognizer.gouravkhunger.xyz")
+                            )
+                            startActivity(browserIntent)
+                            dialog.dismiss()
+                        }
+                    )
+                }
+
+                override fun onFailed(error: AppUpdaterError) {}
+            })
+
+        appUpdaterUtils.start()
     }
 }
