@@ -17,7 +17,9 @@ import android.text.TextUtils
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import android.content.*
+import android.graphics.ImageDecoder
 import android.net.Uri
+import android.os.Build
 import android.view.Menu
 import com.bumptech.glide.Glide
 import android.view.MenuItem
@@ -220,7 +222,7 @@ class Home : AppCompatActivity() {
                 .addOnSuccessListener { result: Text ->
                     val text = result.text
                     if (!TextUtils.isEmpty(text)) {
-                        showAlert(
+                        showAlertDialog(
                             "Text Recognized",
                             text,
                             false,
@@ -241,11 +243,17 @@ class Home : AppCompatActivity() {
                             }
                         )
                     } else {
-                        showAlert(
+                        showAlertDialog(
                             "Ooof",
                             "No Text Detected!",
                             false,
-                            "Ok", { dialog, _ -> dialog.dismiss() },
+                            "Ok", { dialog, _ ->
+                                run {
+                                    binding.progress.visibility = View.GONE
+                                    binding.processImage.visibility = View.VISIBLE
+                                    dialog.dismiss()
+                                }
+                            },
                         )
                     }
                 }
@@ -266,6 +274,7 @@ class Home : AppCompatActivity() {
             resultCode,
             data
         )
+
         if (requestCode == PICK_IMAGE_CODE && resultCode == RESULT_OK && data != null && data.data != null) {
             try {
                 bitmap = MediaStore.Images.Media
@@ -281,6 +290,7 @@ class Home : AppCompatActivity() {
                 hideAll()
             }
         }
+
         if (requestCode == CAPTURE_IMAGE_CODE) {
             if (resultCode == RESULT_OK) {
                 bitmap = data!!.extras!!["data"] as Bitmap?
@@ -292,22 +302,31 @@ class Home : AppCompatActivity() {
                 hideAll()
             }
         }
+
         if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
             val result = CropImage.getActivityResult(data)
             if (resultCode == RESULT_OK) {
                 try {
-                    bitmap = MediaStore.Images.Media
-                        .getBitmap(
+                    bitmap = when {
+                        Build.VERSION.SDK_INT < 28 -> MediaStore.Images.Media.getBitmap(
                             this.contentResolver,
                             result.uri
                         )
+                        else -> {
+                            val source = ImageDecoder.createSource(
+                                this.contentResolver,
+                                result.uri
+                            )
+                            ImageDecoder.decodeBitmap(source)
+                        }
+                    }
+
                     Glide.with(this@Home)
                         .load(bitmap)
                         .into(binding.image)
-                    val fdelete = File(result.uri.path)
-                    if (fdelete.exists()) {
-                        fdelete.delete()
-                    }
+
+                    result.uri.path?.let { File(it).absoluteFile.delete() }
+
                     showAll()
                 } catch (e: IOException) {
                     e.printStackTrace()
@@ -333,7 +352,7 @@ class Home : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.about) {
-            showAlert(
+            showAlertDialog(
                 "About",
                 resources.getString(R.string.about),
                 false,
@@ -356,7 +375,7 @@ class Home : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
-    fun showAlert(
+    fun showAlertDialog(
         title: String,
         message: String,
         isCancelable: Boolean,
@@ -392,7 +411,7 @@ class Home : AppCompatActivity() {
             .withListener(object : UpdateListener {
                 override fun onSuccess(update: Update, isUpdateAvailable: Boolean) {
                     if (!isUpdateAvailable) return
-                    showAlert(
+                    showAlertDialog(
                         "Wohhhooo!!!",
                         "A new update of the app is available!!\n\nPlease Open the link to download latest APK",
                         false,
