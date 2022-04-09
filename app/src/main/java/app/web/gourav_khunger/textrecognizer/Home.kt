@@ -9,7 +9,6 @@ import com.github.javiersantos.appupdater.AppUpdaterUtils
 import com.github.javiersantos.appupdater.enums.UpdateFrom
 import com.github.javiersantos.appupdater.AppUpdaterUtils.UpdateListener
 import com.github.javiersantos.appupdater.objects.Update
-import androidx.core.content.ContextCompat
 import com.github.javiersantos.appupdater.enums.AppUpdaterError
 import com.theartofdev.edmodo.cropper.CropImage
 import android.content.pm.PackageManager
@@ -106,27 +105,19 @@ class Home : AppCompatActivity() {
             .withListener(object : UpdateListener {
                 override fun onSuccess(update: Update, isUpdateAvailable: Boolean) {
                     if (isUpdateAvailable) {
-                        val builder = AlertDialog.Builder(this@Home, R.style.AlertDialogTheme)
-                        builder.setTitle("Wohhhooo!!!")
-                            .setMessage("A new update of the app is available!!\n\nPlease Open the link and install latest APK")
-                            .setCancelable(false)
-                            .setPositiveButton("Open link") { dialog, _ ->
+                        showAlert(
+                            "Wohhhooo!!!",
+                            "A new update of the app is available!!\n\nPlease Open the link to download latest APK",
+                            false,
+                            "Open link", { dialog, _ ->
                                 val browserIntent = Intent(
                                     Intent.ACTION_VIEW,
-                                    Uri.parse("https://github.com/GouravKhunger/TextRecognizer/releases")
+                                    Uri.parse("http://textrecognizer.gouravkhunger.xyz")
                                 )
                                 startActivity(browserIntent)
                                 dialog.dismiss()
                             }
-                        val alert = builder.create()
-                        alert.window!!.setBackgroundDrawableResource(R.drawable.round_dialog)
-                        alert.setOnShowListener {
-                            alert.getButton(AlertDialog.BUTTON_POSITIVE)
-                                .setTextColor(ContextCompat.getColor(this@Home, R.color.blue))
-                            alert.getButton(AlertDialog.BUTTON_NEGATIVE)
-                                .setTextColor(ContextCompat.getColor(this@Home, R.color.blue))
-                        }
-                        alert.show()
+                        )
                     }
                 }
 
@@ -259,37 +250,21 @@ class Home : AppCompatActivity() {
                     val text = result.text
                     dialog.dismiss()
                     if (!TextUtils.isEmpty(text)) {
-                        val builder = AlertDialog.Builder(this@Home, R.style.AlertDialogTheme)
-                        builder.setTitle("Text Recognized")
-                            .setMessage(text)
-                            .setCancelable(false)
-                            .setPositiveButton("Copy") { _, _ -> copyText(text) }
-                            .setNegativeButton("Cancel") { _, _ -> hideAll() }
-                            .setNeutralButton("Close Dialog") { dialog, _ -> dialog.cancel() }
-                        val alert = builder.create()
-                        alert.window!!.setBackgroundDrawableResource(R.drawable.round_dialog)
-                        alert.setOnShowListener {
-                            alert.getButton(AlertDialog.BUTTON_POSITIVE)
-                                .setTextColor(ContextCompat.getColor(this@Home, R.color.blue))
-                            alert.getButton(AlertDialog.BUTTON_NEGATIVE)
-                                .setTextColor(ContextCompat.getColor(this@Home, R.color.blue))
-                        }
-                        alert.show()
+                        showAlert(
+                            "Text Recognized",
+                            text,
+                            false,
+                            "Copy", { _, _ -> copyText(text) },
+                            "Cancel", { _, _ -> hideAll() },
+                            "Close Dialog", { dialog, _ -> dialog.cancel() }
+                        )
                     } else {
-                        val builder = AlertDialog.Builder(this@Home, R.style.AlertDialogTheme)
-                        builder.setTitle("Ooof")
-                            .setMessage("No Text Detected!")
-                            .setCancelable(false)
-                            .setPositiveButton("Ok") { dialog, _ -> dialog.dismiss() }
-                        val alert = builder.create()
-                        alert.window!!.setBackgroundDrawableResource(R.drawable.round_dialog)
-                        alert.setOnShowListener {
-                            alert.getButton(AlertDialog.BUTTON_POSITIVE)
-                                .setTextColor(ContextCompat.getColor(this@Home, R.color.blue))
-                            alert.getButton(AlertDialog.BUTTON_NEGATIVE)
-                                .setTextColor(ContextCompat.getColor(this@Home, R.color.blue))
-                        }
-                        alert.show()
+                        showAlert(
+                            "Ooof",
+                            "No Text Detected!",
+                            false,
+                            "Ok", { dialog, _ -> dialog.dismiss() },
+                        )
                     }
                 }
                 .addOnFailureListener { e: Exception ->
@@ -376,23 +351,15 @@ class Home : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.about) {
-            val builder = AlertDialog.Builder(this@Home, R.style.AlertDialogTheme)
-            builder.setTitle("About")
-                .setMessage(resources.getString(R.string.about))
-                .setCancelable(false)
-                .setPositiveButton("Nice!") { dialog, _ ->
+            showAlert(
+                "About",
+                resources.getString(R.string.about),
+                false,
+                "Coool!", { dialog, _ ->
                     dialog.dismiss()
                     Toast.makeText(this, "Thank you :)", Toast.LENGTH_SHORT).show()
                 }
-            val alert = builder.create()
-            alert.window!!.setBackgroundDrawableResource(R.drawable.round_dialog)
-            alert.setOnShowListener {
-                alert.getButton(AlertDialog.BUTTON_POSITIVE)
-                    .setTextColor(ContextCompat.getColor(this@Home, R.color.blue))
-                alert.getButton(AlertDialog.BUTTON_NEGATIVE)
-                    .setTextColor(ContextCompat.getColor(this@Home, R.color.blue))
-            }
-            alert.show()
+            )
             return true
         } else if (item.itemId == R.id.themeSwitcher) {
             CoroutineScope(Dispatchers.IO).launch {
@@ -405,5 +372,34 @@ class Home : AppCompatActivity() {
             }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    fun showAlert (
+        title: String,
+        message: String,
+        isCancelable: Boolean,
+        positiveBtnText: String? = "",
+        positiveBtnOnClickListener: (DialogInterface, Int) -> Unit = { _, _ -> },
+        negativeBtnText: String = "",
+        negativeBtnOnClickListener: (DialogInterface, Int) -> Unit = { _, _ -> },
+        neutralBtnText: String = "",
+        neutralBtnOnClickListener: (DialogInterface, Int) -> Unit = { _, _ -> }
+    ) {
+        val builder = AlertDialog.Builder(this, R.style.AlertDialogTheme)
+        builder.setTitle(title)
+            .setMessage(message)
+            .setCancelable(isCancelable)
+            .setPositiveButton(positiveBtnText) { dialog, which ->
+                positiveBtnOnClickListener(dialog, which)
+            }
+            .setNegativeButton(negativeBtnText) { dialog, which ->
+                negativeBtnOnClickListener(dialog, which)
+            }
+            .setNeutralButton(neutralBtnText) { dialog, which ->
+                neutralBtnOnClickListener(dialog, which)
+            }
+        val alert = builder.create()
+        alert.window!!.setBackgroundDrawableResource(R.drawable.round_dialog)
+        alert.show()
     }
 }
