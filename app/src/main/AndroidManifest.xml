@@ -17,6 +17,7 @@
         android:roundIcon="@drawable/logo"
         android:supportsRtl="true"
         android:theme="@style/Theme.TextRecogniser">
+
         <activity android:name="com.theartofdev.edmodo.cropper.CropImageActivity"
             android:theme="@style/Base.Theme.AppCompat"/>
 
@@ -24,7 +25,7 @@
             android:name="com.google.mlkit.vision.DEPENDENCIES"
             android:value="ocr" />
 
-        <activity android:name=".Splash"
+        <activity android:name=".Home"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -32,7 +33,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Home" />
+
     </application>
 
 </manifest>
