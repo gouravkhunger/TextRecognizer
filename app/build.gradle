@@ -49,6 +49,15 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
     implementation "androidx.core:core-ktx:1.7.0"
+
+    // Datastore
+    implementation "androidx.datastore:datastore-preferences:1.0.0"
+
+    // Live Data
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.4.1"
+
+    // Coroutines
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.4.1"
 }
 
 repositories {

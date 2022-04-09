@@ -4,7 +4,6 @@ import android.Manifest
 import androidx.appcompat.app.AppCompatActivity
 import android.graphics.Bitmap
 import android.os.Bundle
-import android.preference.PreferenceManager
 import androidx.appcompat.app.AppCompatDelegate
 import com.github.javiersantos.appupdater.AppUpdaterUtils
 import com.github.javiersantos.appupdater.enums.UpdateFrom
@@ -27,40 +26,80 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.emptyPreferences
+import androidx.datastore.preferences.preferencesDataStore
+import androidx.lifecycle.asLiveData
 import app.web.gourav_khunger.textrecognizer.databinding.ActivityHomeBinding
 import com.google.mlkit.vision.text.Text
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
 import java.lang.Exception
 
+val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
+    name = "theme_settings"
+)
+
 class Home : AppCompatActivity() {
 
-    private lateinit var binding: ActivityHomeBinding
+    companion object {
+        private const val PICK_IMAGE_CODE = 0
+        private const val CAPTURE_IMAGE_CODE = 1
+        private const val CAMERA_REQUEST_CODE = 2
+        private const val WRITE_REQUEST_CODE = 3
+        private val DARK_THEME_KEY = booleanPreferencesKey("is_dark_theme")
+    }
+
     private var bitmap: Bitmap? = null
-    private var preferences: SharedPreferences? = null
-    private lateinit var editor: SharedPreferences.Editor
+    private lateinit var binding: ActivityHomeBinding
+
+    private lateinit var isDarkTheme: Flow<Boolean>
+    private var isDarkThemeEnabled = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         binding = ActivityHomeBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        preferences = PreferenceManager.getDefaultSharedPreferences(this)
+
         init()
     }
 
-    override fun onStart() {
-        super.onStart()
-        val isDark = preferences!!.getBoolean("theme", false)
-        if (isDark) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-        } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-        }
-    }
-
     private fun init() {
+        isDarkTheme = this.dataStore.data
+            .catch {
+                if (it is IOException) {
+                    it.printStackTrace()
+                    emit(emptyPreferences())
+                } else {
+                    throw it
+                }
+            }
+            .map { preferences ->
+                preferences[DARK_THEME_KEY] ?: false
+            }
+
+        isDarkTheme.asLiveData().observe(this) { isDark ->
+            isDarkThemeEnabled = isDark
+            if (isDark) {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            } else {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+            }
+            invalidateOptionsMenu()
+        }
+
         val appUpdaterUtils = AppUpdaterUtils(this)
             .setUpdateFrom(UpdateFrom.GITHUB)
             .setGitHubUserAndRepo("GouravKhunger", "TextRecognizer")
@@ -327,14 +366,16 @@ class Home : AppCompatActivity() {
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        val inflater = menuInflater
-        inflater.inflate(R.menu.main, menu)
-        if (isDarkTheme) {
-            menu.findItem(R.id.themeSwitcher).setIcon(R.drawable.day)
-        } else {
-            menu.findItem(R.id.themeSwitcher).setIcon(R.drawable.night)
-        }
+        menuInflater.inflate(R.menu.main, menu)
         return true
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
+        if (isDarkThemeEnabled)
+            menu.findItem(R.id.themeSwitcher).setIcon(R.drawable.day)
+        else
+            menu.findItem(R.id.themeSwitcher).setIcon(R.drawable.night)
+        return super.onPrepareOptionsMenu(menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -358,29 +399,15 @@ class Home : AppCompatActivity() {
             alert.show()
             return true
         } else if (item.itemId == R.id.themeSwitcher) {
-            editor = preferences!!.edit()
-            if (isDarkTheme) {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-                item.setIcon(R.drawable.night)
-                editor.putBoolean("theme", false)
-                editor.apply()
-            } else {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-                item.setIcon(R.drawable.day)
-                editor.putBoolean("theme", true)
-                editor.apply()
+            CoroutineScope(Dispatchers.IO).launch {
+                this@Home.dataStore.edit {
+                    var isDark = false
+                    it[DARK_THEME_KEY]?.apply { isDark = this }
+                    it[DARK_THEME_KEY] = !isDark
+                    isDarkThemeEnabled = !isDark
+                }
             }
         }
         return super.onOptionsItemSelected(item)
-    }
-
-    private val isDarkTheme: Boolean
-        get() = AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES
-
-    companion object {
-        private const val PICK_IMAGE_CODE = 0
-        private const val CAPTURE_IMAGE_CODE = 1
-        private const val CAMERA_REQUEST_CODE = 2
-        private const val WRITE_REQUEST_CODE = 3
     }
 }
