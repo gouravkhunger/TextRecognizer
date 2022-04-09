@@ -47,9 +47,9 @@ class Home : AppCompatActivity() {
     private lateinit var clearAll: Button
     private lateinit var processImage: Button
     private lateinit var crop: Button
-    var selectImageText: TextView? = null
-    var bitmap: Bitmap? = null
-    var preferences: SharedPreferences? = null
+    private var selectImageText: TextView? = null
+    private var bitmap: Bitmap? = null
+    private var preferences: SharedPreferences? = null
     private lateinit var editor: SharedPreferences.Editor
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -80,7 +80,7 @@ class Home : AppCompatActivity() {
                         builder.setTitle("Wohhhooo!!!")
                             .setMessage("A new update of the app is available!!\n\nPlease Open the link and install latest APK")
                             .setCancelable(false)
-                            .setPositiveButton("Open link") { dialog1: DialogInterface, id: Int ->
+                            .setPositiveButton("Open link") { dialog1: DialogInterface, _: Int ->
                                 val browserIntent = Intent(
                                     Intent.ACTION_VIEW,
                                     Uri.parse("https://github.com/GouravKhunger/TextRecognizer/releases")
@@ -90,7 +90,7 @@ class Home : AppCompatActivity() {
                             }
                         val alert = builder.create()
                         alert.window!!.setBackgroundDrawableResource(R.drawable.round_dialog)
-                        alert.setOnShowListener { arg0: DialogInterface? ->
+                        alert.setOnShowListener { _: DialogInterface? ->
                             alert.getButton(AlertDialog.BUTTON_POSITIVE)
                                 .setTextColor(ContextCompat.getColor(this@Home, R.color.blue))
                             alert.getButton(AlertDialog.BUTTON_NEGATIVE)
@@ -106,14 +106,14 @@ class Home : AppCompatActivity() {
             })
         appUpdaterUtils.start()
         toolbar = findViewById(R.id.toolbar_home)
-        toolbar.setTitle("")
+        toolbar.title = ""
         setSupportActionBar(toolbar)
         selectImageText = findViewById(R.id.selectImageText)
         imageHolder = findViewById(R.id.imageHolder)
         image = findViewById(R.id.image)
         selectButtons = findViewById(R.id.selectionButtons)
         crop = findViewById(R.id.cropImage)
-        crop.setOnClickListener(View.OnClickListener { v: View? ->
+        crop.setOnClickListener {
             if (bitmap != null) {
                 val uri = getImageUri(this, bitmap!!)
                 if (uri != null) {
@@ -123,16 +123,16 @@ class Home : AppCompatActivity() {
                     Toast.makeText(this, "Incorrect image path :(", Toast.LENGTH_SHORT).show()
                 }
             }
-        })
+        }
         processButtons = findViewById(R.id.processButtons)
         captureImage = findViewById(R.id.captureImage)
-        captureImage.setOnClickListener(View.OnClickListener { v: View? -> captureAnImage() })
+        captureImage.setOnClickListener { captureAnImage() }
         selectFromStorage = findViewById(R.id.selectFromStorage)
-        selectFromStorage.setOnClickListener(View.OnClickListener { v: View? -> selectFromStorage() })
+        selectFromStorage.setOnClickListener { selectFromStorage() }
         processImage = findViewById(R.id.processImage)
-        processImage.setOnClickListener(View.OnClickListener { v: View? -> processImage() })
+        processImage.setOnClickListener { processImage() }
         clearAll = findViewById(R.id.clearAll)
-        clearAll.setOnClickListener(View.OnClickListener { v: View? -> hideAll() })
+        clearAll.setOnClickListener { hideAll() }
         hideAll()
     }
 
@@ -234,7 +234,7 @@ class Home : AppCompatActivity() {
                             .setNeutralButton("Close Dialog") { dialog1: DialogInterface, which: Int -> dialog1.cancel() }
                         val alert = builder.create()
                         alert.window!!.setBackgroundDrawableResource(R.drawable.round_dialog)
-                        alert.setOnShowListener { arg0: DialogInterface? ->
+                        alert.setOnShowListener {
                             alert.getButton(AlertDialog.BUTTON_POSITIVE)
                                 .setTextColor(ContextCompat.getColor(this@Home, R.color.blue))
                             alert.getButton(AlertDialog.BUTTON_NEGATIVE)
@@ -249,7 +249,7 @@ class Home : AppCompatActivity() {
                             .setPositiveButton("Ok") { dialog1: DialogInterface, id: Int -> dialog1.dismiss() }
                         val alert = builder.create()
                         alert.window!!.setBackgroundDrawableResource(R.drawable.round_dialog)
-                        alert.setOnShowListener { arg0: DialogInterface? ->
+                        alert.setOnShowListener {
                             alert.getButton(AlertDialog.BUTTON_POSITIVE)
                                 .setTextColor(ContextCompat.getColor(this@Home, R.color.blue))
                             alert.getButton(AlertDialog.BUTTON_NEGATIVE)
@@ -344,7 +344,7 @@ class Home : AppCompatActivity() {
             builder.setTitle("About")
                 .setMessage(resources.getString(R.string.about))
                 .setCancelable(false)
-                .setPositiveButton("Nice!") { dialog1: DialogInterface, id: Int ->
+                .setPositiveButton("Nice!") { dialog1: DialogInterface, _: Int ->
                     dialog1.dismiss()
                     Toast.makeText(this, "Thank you :)", Toast.LENGTH_SHORT).show()
                 }
@@ -375,7 +375,7 @@ class Home : AppCompatActivity() {
         return super.onOptionsItemSelected(item)
     }
 
-    val isDarkTheme: Boolean
+    private val isDarkTheme: Boolean
         get() = AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES
 
     companion object {
