@@ -2,7 +2,6 @@ package app.web.gourav_khunger.textrecognizer
 
 import android.Manifest
 import androidx.appcompat.app.AppCompatActivity
-import androidx.cardview.widget.CardView
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.preference.PreferenceManager
@@ -28,7 +27,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.widget.Toolbar
+import app.web.gourav_khunger.textrecognizer.databinding.ActivityHomeBinding
 import com.google.mlkit.vision.text.Text
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
 import java.io.ByteArrayOutputStream
@@ -37,24 +36,16 @@ import java.io.IOException
 import java.lang.Exception
 
 class Home : AppCompatActivity() {
-    private lateinit var toolbar: Toolbar
-    private var imageHolder: CardView? = null
-    private var image: ImageView? = null
-    private var selectButtons: LinearLayout? = null
-    private var processButtons: LinearLayout? = null
-    private lateinit var captureImage: Button
-    private lateinit var selectFromStorage: Button
-    private lateinit var clearAll: Button
-    private lateinit var processImage: Button
-    private lateinit var crop: Button
-    private var selectImageText: TextView? = null
+
+    private lateinit var binding: ActivityHomeBinding
     private var bitmap: Bitmap? = null
     private var preferences: SharedPreferences? = null
     private lateinit var editor: SharedPreferences.Editor
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_home)
+        binding = ActivityHomeBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         preferences = PreferenceManager.getDefaultSharedPreferences(this)
         init()
     }
@@ -101,38 +92,41 @@ class Home : AppCompatActivity() {
                 }
 
                 override fun onFailed(error: AppUpdaterError) {
-                    Toast.makeText(this@Home, "Error checking for update!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@Home, "Error checking for update!", Toast.LENGTH_SHORT)
+                        .show()
                 }
             })
+
         appUpdaterUtils.start()
-        toolbar = findViewById(R.id.toolbar_home)
-        toolbar.title = ""
-        setSupportActionBar(toolbar)
-        selectImageText = findViewById(R.id.selectImageText)
-        imageHolder = findViewById(R.id.imageHolder)
-        image = findViewById(R.id.image)
-        selectButtons = findViewById(R.id.selectionButtons)
-        crop = findViewById(R.id.cropImage)
-        crop.setOnClickListener {
-            if (bitmap != null) {
-                val uri = getImageUri(this, bitmap!!)
-                if (uri != null) {
-                    CropImage.activity(uri)
-                        .start(this)
-                } else {
-                    Toast.makeText(this, "Incorrect image path :(", Toast.LENGTH_SHORT).show()
+
+        binding.apply {
+            toolbarHome.title = ""
+            setSupportActionBar(toolbarHome)
+
+            cropImage.setOnClickListener {
+                if (bitmap == null) return@setOnClickListener
+
+                val uri = getImageUri(this@Home, bitmap!!)
+                if (uri == null) {
+                    Toast.makeText(
+                        this@Home,
+                        "Incorrect image path :(",
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                    return@setOnClickListener
                 }
+
+                CropImage.activity(uri)
+                    .start(this@Home)
             }
+
+            captureImage.setOnClickListener { captureAnImage() }
+            selectFromStorage.setOnClickListener { selectFromStorage() }
+            processImage.setOnClickListener { processImage() }
+            clearAll.setOnClickListener { hideAll() }
         }
-        processButtons = findViewById(R.id.processButtons)
-        captureImage = findViewById(R.id.captureImage)
-        captureImage.setOnClickListener { captureAnImage() }
-        selectFromStorage = findViewById(R.id.selectFromStorage)
-        selectFromStorage.setOnClickListener { selectFromStorage() }
-        processImage = findViewById(R.id.processImage)
-        processImage.setOnClickListener { processImage() }
-        clearAll = findViewById(R.id.clearAll)
-        clearAll.setOnClickListener { hideAll() }
+
         hideAll()
     }
 
@@ -192,19 +186,24 @@ class Home : AppCompatActivity() {
     }
 
     private fun hideAll() {
-        image!!.setImageResource(0)
-        imageHolder!!.visibility = View.GONE
-        processButtons!!.visibility = View.GONE
-        selectButtons!!.visibility = View.VISIBLE
-        selectImageText!!.visibility = View.VISIBLE
+        binding.apply {
+            image.setImageResource(0)
+            imageHolder.visibility = View.GONE
+            processButtons.visibility = View.GONE
+            selectionButtons.visibility = View.VISIBLE
+            selectImageText.visibility = View.VISIBLE
+        }
+
         bitmap = null
     }
 
     private fun showAll() {
-        imageHolder!!.visibility = View.VISIBLE
-        processButtons!!.visibility = View.VISIBLE
-        selectButtons!!.visibility = View.GONE
-        selectImageText!!.visibility = View.GONE
+        binding.apply {
+            imageHolder.visibility = View.VISIBLE
+            processButtons.visibility = View.VISIBLE
+            selectionButtons.visibility = View.GONE
+            selectImageText.visibility = View.GONE
+        }
     }
 
     private fun processImage() {
@@ -284,7 +283,7 @@ class Home : AppCompatActivity() {
                     )
                 Glide.with(this@Home)
                     .load(bitmap)
-                    .into(image!!)
+                    .into(binding.image)
                 showAll()
             } catch (e: IOException) {
                 hideAll()
@@ -295,7 +294,7 @@ class Home : AppCompatActivity() {
                 bitmap = data!!.extras!!["data"] as Bitmap?
                 Glide.with(this@Home)
                     .load(bitmap)
-                    .into(image!!)
+                    .into(binding.image)
                 showAll()
             } else {
                 hideAll()
@@ -312,7 +311,7 @@ class Home : AppCompatActivity() {
                         )
                     Glide.with(this@Home)
                         .load(bitmap)
-                        .into(image!!)
+                        .into(binding.image)
                     val fdelete = File(result.uri.path)
                     if (fdelete.exists()) {
                         fdelete.delete()
