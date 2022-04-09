@@ -110,17 +110,17 @@ class Home : AppCompatActivity() {
                         builder.setTitle("Wohhhooo!!!")
                             .setMessage("A new update of the app is available!!\n\nPlease Open the link and install latest APK")
                             .setCancelable(false)
-                            .setPositiveButton("Open link") { dialog1: DialogInterface, _: Int ->
+                            .setPositiveButton("Open link") { dialog, _ ->
                                 val browserIntent = Intent(
                                     Intent.ACTION_VIEW,
                                     Uri.parse("https://github.com/GouravKhunger/TextRecognizer/releases")
                                 )
                                 startActivity(browserIntent)
-                                dialog1.dismiss()
+                                dialog.dismiss()
                             }
                         val alert = builder.create()
                         alert.window!!.setBackgroundDrawableResource(R.drawable.round_dialog)
-                        alert.setOnShowListener { _: DialogInterface? ->
+                        alert.setOnShowListener {
                             alert.getButton(AlertDialog.BUTTON_POSITIVE)
                                 .setTextColor(ContextCompat.getColor(this@Home, R.color.blue))
                             alert.getButton(AlertDialog.BUTTON_NEGATIVE)
@@ -189,8 +189,8 @@ class Home : AppCompatActivity() {
         return null
     }
 
-    private fun copyText(text: String?) {
-        if (!TextUtils.isEmpty(text) && text != null) {
+    private fun copyText(text: String) {
+        if (!TextUtils.isEmpty(text)) {
             val clipboard = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
             val clip = ClipData.newPlainText("Recognized Text", text)
             clipboard.setPrimaryClip(clip)
@@ -258,18 +258,14 @@ class Home : AppCompatActivity() {
                 .addOnSuccessListener { result: Text ->
                     val text = result.text
                     dialog.dismiss()
-                    if (!TextUtils.isEmpty(text) && text != null) {
+                    if (!TextUtils.isEmpty(text)) {
                         val builder = AlertDialog.Builder(this@Home, R.style.AlertDialogTheme)
                         builder.setTitle("Text Recognized")
                             .setMessage(text)
                             .setCancelable(false)
-                            .setPositiveButton("Copy") { dialog1: DialogInterface?, id: Int ->
-                                copyText(
-                                    text
-                                )
-                            }
-                            .setNegativeButton("Cancel") { dialog1: DialogInterface?, which: Int -> hideAll() }
-                            .setNeutralButton("Close Dialog") { dialog1: DialogInterface, which: Int -> dialog1.cancel() }
+                            .setPositiveButton("Copy") { _, _ -> copyText(text) }
+                            .setNegativeButton("Cancel") { _, _ -> hideAll() }
+                            .setNeutralButton("Close Dialog") { dialog, _ -> dialog.cancel() }
                         val alert = builder.create()
                         alert.window!!.setBackgroundDrawableResource(R.drawable.round_dialog)
                         alert.setOnShowListener {
@@ -284,7 +280,7 @@ class Home : AppCompatActivity() {
                         builder.setTitle("Ooof")
                             .setMessage("No Text Detected!")
                             .setCancelable(false)
-                            .setPositiveButton("Ok") { dialog1: DialogInterface, id: Int -> dialog1.dismiss() }
+                            .setPositiveButton("Ok") { dialog, _ -> dialog.dismiss() }
                         val alert = builder.create()
                         alert.window!!.setBackgroundDrawableResource(R.drawable.round_dialog)
                         alert.setOnShowListener {
@@ -384,13 +380,13 @@ class Home : AppCompatActivity() {
             builder.setTitle("About")
                 .setMessage(resources.getString(R.string.about))
                 .setCancelable(false)
-                .setPositiveButton("Nice!") { dialog1: DialogInterface, _: Int ->
-                    dialog1.dismiss()
+                .setPositiveButton("Nice!") { dialog, _ ->
+                    dialog.dismiss()
                     Toast.makeText(this, "Thank you :)", Toast.LENGTH_SHORT).show()
                 }
             val alert = builder.create()
             alert.window!!.setBackgroundDrawableResource(R.drawable.round_dialog)
-            alert.setOnShowListener { arg0: DialogInterface? ->
+            alert.setOnShowListener {
                 alert.getButton(AlertDialog.BUTTON_POSITIVE)
                     .setTextColor(ContextCompat.getColor(this@Home, R.color.blue))
                 alert.getButton(AlertDialog.BUTTON_NEGATIVE)
