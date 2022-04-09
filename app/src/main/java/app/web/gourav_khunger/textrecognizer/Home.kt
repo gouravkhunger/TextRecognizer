@@ -14,7 +14,6 @@ import com.theartofdev.edmodo.cropper.CropImage
 import android.content.pm.PackageManager
 import android.provider.MediaStore
 import android.text.TextUtils
-import android.app.ProgressDialog
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import android.content.*
@@ -193,6 +192,8 @@ class Home : AppCompatActivity() {
             processButtons.visibility = View.GONE
             selectionButtons.visibility = View.VISIBLE
             selectImageText.visibility = View.VISIBLE
+            progress.visibility = View.GONE
+            processImage.visibility = View.VISIBLE
         }
 
         bitmap = null
@@ -208,26 +209,36 @@ class Home : AppCompatActivity() {
     }
 
     private fun processImage() {
+        binding.apply {
+            progress.visibility = View.VISIBLE
+            processImage.visibility = View.GONE
+        }
         if (bitmap != null) {
-            val dialog = ProgressDialog(this)
-            dialog.setTitle("Processing...")
-            dialog.setMessage("Please have patience ._.")
-            dialog.setCancelable(false)
-            dialog.show()
             val inputImage = InputImage.fromBitmap(bitmap!!, 0)
             val recognizer = TextRecognition.getClient(TextRecognizerOptions.DEFAULT_OPTIONS)
             recognizer.process(inputImage)
                 .addOnSuccessListener { result: Text ->
                     val text = result.text
-                    dialog.dismiss()
                     if (!TextUtils.isEmpty(text)) {
                         showAlert(
                             "Text Recognized",
                             text,
                             false,
-                            "Copy", { _, _ -> copyText(text) },
+                            "Copy", { _, _ ->
+                                run {
+                                    binding.progress.visibility = View.GONE
+                                    binding.processImage.visibility = View.VISIBLE
+                                    copyText(text)
+                                }
+                            },
                             "Cancel", { _, _ -> hideAll() },
-                            "Close Dialog", { dialog, _ -> dialog.cancel() }
+                            "Close Dialog", { dialog, _ ->
+                                run {
+                                    binding.progress.visibility = View.GONE
+                                    binding.processImage.visibility = View.VISIBLE
+                                    dialog.cancel()
+                                }
+                            }
                         )
                     } else {
                         showAlert(
